@@ -8,7 +8,7 @@
 
 import Foundation
 
-class Item {
+class Item: Encodable {
     init(title: String) {
         self.title = title
         
