@@ -1,0 +1,104 @@
+import UIKit
+
+class ToDoListViewController: UITableViewController, UITextFieldDelegate {
+    var alertActionAdd = UIAlertAction()
+    var itemArray = [Item]()
+    
+    let defaults = UserDefaults.standard
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        let newItem1 = Item(title: "Find Mike")
+        itemArray.append(newItem1)
+        let newItem2 = Item(title: "Buy")
+        itemArray.append(newItem2)
+        let newItem3 = Item(title: "Sell")
+        itemArray.append(newItem3)
+//        if let items = defaults.array(forKey: "ToDoListArray") as? [String] {
+//            itemArray = items
+//        }
+        
+    }
+    
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return itemArray.count
+    }
+    
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
+        let item = itemArray[indexPath.row]
+        var content = cell.defaultContentConfiguration()
+        content.text = item.title
+        cell.contentConfiguration = content
+        if item.done == true {
+            cell.accessoryType = .checkmark
+        } else {
+            cell.accessoryType = .none
+        }
+        return cell
+    }
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        itemArray[indexPath.row].done = !itemArray[indexPath.row].done
+        
+        tableView.reloadData()
+        tableView.deselectRow(at: indexPath, animated: true)
+        
+    }
+    
+    //MARK: - Add new Items to the list
+    @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
+        
+        var textField = UITextField()
+
+        let alert = UIAlertController(title: "Add New Todoey Item", message: "", preferredStyle: .alert)
+        
+        alertActionAdd = UIAlertAction(title: "Add Item", style: .default) { action in
+            
+            let newItem = Item(title: textField.text!)
+            self.itemArray.append(newItem)
+            self.defaults.set(self.itemArray, forKey: "ToDoListArray")
+            self.tableView.reloadData()
+    
+        }
+        alertActionAdd.isEnabled = false
+        
+        let alertActionDismiss = UIAlertAction(title: "Cancel", style: .default) { action in
+            alert.dismiss(animated: true, completion: nil)
+        }
+        
+        alert.addTextField { alertTextField in
+            alertTextField.delegate = self
+            alertTextField.placeholder = "Create New Item"
+            alertTextField.autocapitalizationType = .words
+            textField = alertTextField
+        }
+        alert.addAction(alertActionAdd)
+        alert.addAction(alertActionDismiss)
+        
+        self.present(alert, animated: true) {
+            alert.view.superview?.isUserInteractionEnabled = true
+            alert.view.superview?.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(self.dismissOnTapOutside)))
+        }
+        
+    }
+    
+    @objc func dismissOnTapOutside() {
+        self.dismiss(animated: true, completion: nil)
+    }
+    
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        
+        let userEnteredString = textField.text
+        let newString = (userEnteredString! as NSString).replacingCharacters(in: range, with: string) as NSString
+        if  newString != "" {
+            alertActionAdd.isEnabled = true
+        } else {
+            alertActionAdd.isEnabled = false
+        }
+        return true
+    }
+}
+
