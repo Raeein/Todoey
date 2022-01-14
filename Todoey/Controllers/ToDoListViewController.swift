@@ -31,20 +31,19 @@ class ToDoListViewController: UITableViewController, UITextFieldDelegate {
         var content = cell.defaultContentConfiguration()
         content.text = item.title
         cell.contentConfiguration = content
-        if item.done == true {
-            cell.accessoryType = .checkmark
-        } else {
-            cell.accessoryType = .none
-        }
+        
+//        item.done ? (cell.accessoryType = .checkmark) : (cell.accessoryType = .none)
+        cell.accessoryType = (item.done ? .checkmark : .none)
         return cell
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        itemArray[indexPath.row].done = !itemArray[indexPath.row].done
-        
-        tableView.reloadData()
+//        itemArray[indexPath.row].done = !itemArray[indexPath.row].done
+        itemArray[indexPath.row].done.toggle()
         tableView.deselectRow(at: indexPath, animated: true)
+        tableView.reloadData()
+        
         
     }
     
@@ -93,11 +92,8 @@ class ToDoListViewController: UITableViewController, UITextFieldDelegate {
         
         let userEnteredString = textField.text
         let newString = (userEnteredString! as NSString).replacingCharacters(in: range, with: string) as NSString
-        if  newString != "" {
-            alertActionAdd.isEnabled = true
-        } else {
-            alertActionAdd.isEnabled = false
-        }
+//        newString != "" ? (alertActionAdd.isEnabled = true) : (alertActionAdd.isEnabled = false)
+        alertActionAdd.isEnabled = (newString != "" ? true : false)
         return true
     }
 }
