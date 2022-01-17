@@ -1,19 +1,16 @@
 import UIKit
+import CoreData
 
 class ToDoListViewController: UITableViewController, UITextFieldDelegate {
+    
     var alertActionAdd = UIAlertAction()
     var itemArray = [Item]()
-    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
-    let defaults = UserDefaults.standard
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
-    
-        loadItems()
-//        if let items = defaults.array(forKey: "ToDoListArray") as? [Item] {
-//            itemArray = items
-//        }
-        
+
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -39,9 +36,7 @@ class ToDoListViewController: UITableViewController, UITextFieldDelegate {
         itemArray[indexPath.row].done.toggle()
         tableView.deselectRow(at: indexPath, animated: true)
         saveItems()
-        
-        
-        
+  
     }
     
     //MARK: - Add new Items to the list
@@ -52,12 +47,12 @@ class ToDoListViewController: UITableViewController, UITextFieldDelegate {
         let alert = UIAlertController(title: "Add New Todoey Item", message: "", preferredStyle: .alert)
         
         alertActionAdd = UIAlertAction(title: "Add Item", style: .default) { action in
-            
-            let newItem = Item(title: textField.text!)
+            let newItem = Item(context: self.context)
+            newItem.title = textField.text!
+            newItem.done = false
             self.itemArray.append(newItem)
-            
             self.saveItems()
-            self.tableView.reloadData()
+
     
         }
         alertActionAdd.isEnabled = false
@@ -94,26 +89,26 @@ class ToDoListViewController: UITableViewController, UITextFieldDelegate {
         alertActionAdd.isEnabled = (newString != "" ? true : false)
         return true
     }
+//MARK: - Core Data functionalities
     
     func saveItems() {
-        let encoder = PropertyListEncoder()
+        
         do {
-            let data = try encoder.encode(self.itemArray)
-            try data.write(to: dataFilePath!)
+            try context.save()
         } catch {
-            print("Error encoding item array/ \(error)")
+            print("Error save error context\(error)")
         }
         self.tableView.reloadData()
     }
-    func loadItems() {
-        if let data = try? Data(contentsOf: dataFilePath!) {
-            let decoder = PropertyListDecoder()
-            do {
-                itemArray = try decoder.decode([Item].self, from: data)
-            } catch {
-                print(error)
-            }
-        }
-    }
+//    func loadItems() {
+//        if let data = try? Data(contentsOf: dataFilePath!) {
+//            let decoder = PropertyListDecoder()
+//            do {
+//                itemArray = try decoder.decode([Item].self, from: data)
+//            } catch {
+//                print(error)
+//            }
+//        }
+//    }
 }
 
