@@ -9,13 +9,7 @@ class ToDoListViewController: UITableViewController, UITextFieldDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
     
-        let newItem1 = Item(title: "Find Mike")
-        itemArray.append(newItem1)
-        let newItem2 = Item(title: "Buy")
-        itemArray.append(newItem2)
-        let newItem3 = Item(title: "Sell")
-        itemArray.append(newItem3)
-        
+        loadItems()
 //        if let items = defaults.array(forKey: "ToDoListArray") as? [Item] {
 //            itemArray = items
 //        }
@@ -101,7 +95,7 @@ class ToDoListViewController: UITableViewController, UITextFieldDelegate {
         return true
     }
     
-    func saveItems() -> Void {
+    func saveItems() {
         let encoder = PropertyListEncoder()
         do {
             let data = try encoder.encode(self.itemArray)
@@ -110,6 +104,16 @@ class ToDoListViewController: UITableViewController, UITextFieldDelegate {
             print("Error encoding item array/ \(error)")
         }
         self.tableView.reloadData()
+    }
+    func loadItems() {
+        if let data = try? Data(contentsOf: dataFilePath!) {
+            let decoder = PropertyListDecoder()
+            do {
+                itemArray = try decoder.decode([Item].self, from: data)
+            } catch {
+                print(error)
+            }
+        }
     }
 }
 
