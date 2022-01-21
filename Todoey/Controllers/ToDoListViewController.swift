@@ -6,11 +6,10 @@ class ToDoListViewController: UITableViewController, UITextFieldDelegate {
     var alertActionAdd = UIAlertAction()
     var itemArray = [Item]()
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        loadItems()
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -25,25 +24,25 @@ class ToDoListViewController: UITableViewController, UITextFieldDelegate {
         content.text = item.title
         cell.contentConfiguration = content
         
-//        item.done ? (cell.accessoryType = .checkmark) : (cell.accessoryType = .none)
+        //        item.done ? (cell.accessoryType = .checkmark) : (cell.accessoryType = .none)
         cell.accessoryType = (item.done ? .checkmark : .none)
         return cell
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-//        itemArray[indexPath.row].done = !itemArray[indexPath.row].done
+        //        itemArray[indexPath.row].done = !itemArray[indexPath.row].done
         itemArray[indexPath.row].done.toggle()
         tableView.deselectRow(at: indexPath, animated: true)
         saveItems()
-  
+        
     }
     
     //MARK: - Add new Items to the list
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         
         var textField = UITextField()
-
+        
         let alert = UIAlertController(title: "Add New Todoey Item", message: "", preferredStyle: .alert)
         
         alertActionAdd = UIAlertAction(title: "Add Item", style: .default) { action in
@@ -52,8 +51,8 @@ class ToDoListViewController: UITableViewController, UITextFieldDelegate {
             newItem.done = false
             self.itemArray.append(newItem)
             self.saveItems()
-
-    
+            
+            
         }
         alertActionAdd.isEnabled = false
         
@@ -85,30 +84,29 @@ class ToDoListViewController: UITableViewController, UITextFieldDelegate {
         
         let userEnteredString = textField.text
         let newString = (userEnteredString! as NSString).replacingCharacters(in: range, with: string) as NSString
-//        newString != "" ? (alertActionAdd.isEnabled = true) : (alertActionAdd.isEnabled = false)
+        //        newString != "" ? (alertActionAdd.isEnabled = true) : (alertActionAdd.isEnabled = false)
         alertActionAdd.isEnabled = (newString != "" ? true : false)
         return true
     }
-//MARK: - Core Data functionalities
+    //MARK: - Core Data functionalities
     
     func saveItems() {
         
         do {
             try context.save()
         } catch {
-            print("Error save error context\(error)")
+            print("Error saving context\(error)")
         }
         self.tableView.reloadData()
     }
-//    func loadItems() {
-//        if let data = try? Data(contentsOf: dataFilePath!) {
-//            let decoder = PropertyListDecoder()
-//            do {
-//                itemArray = try decoder.decode([Item].self, from: data)
-//            } catch {
-//                print(error)
-//            }
-//        }
-//    }
+    func loadItems() {
+        let request: NSFetchRequest<Item> = Item.fetchRequest()
+        do {
+            
+            itemArray = try context.fetch(request)
+        } catch {
+            print("Error fetching data from context\(error)")
+        }
+    }
 }
 
