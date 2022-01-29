@@ -21,6 +21,7 @@ class ToDoListViewController: UITableViewController, UITextFieldDelegate {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
         let item = itemArray[indexPath.row]
+        
         var content = cell.defaultContentConfiguration()
         content.text = item.title
         cell.contentConfiguration = content
@@ -109,7 +110,6 @@ class ToDoListViewController: UITableViewController, UITextFieldDelegate {
     }
     func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest()) {
         do {
-            
             itemArray = try context.fetch(request)
         } catch {
             print("Error fetching data from context\(error)")
@@ -118,7 +118,7 @@ class ToDoListViewController: UITableViewController, UITextFieldDelegate {
     
 }
 //MARK: - Search bar methods
-extension ToDoListViewController: UISearchBarDelegate{
+extension ToDoListViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         let request: NSFetchRequest<Item> = Item.fetchRequest()
         request.predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
@@ -126,5 +126,16 @@ extension ToDoListViewController: UISearchBarDelegate{
 
         loadItems(with: request)
     }
+    
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchBar.text?.count == 0 {
+            loadItems()
+            DispatchQueue.main.async {
+                searchBar.resignFirstResponder()
+            }
+        }
+    }
 }
+
 
